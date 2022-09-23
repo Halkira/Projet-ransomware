@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="11b0caa1-5f80-4292-a178-76012a2531e2" name="SRV KVM">
+        <fileTransfer rootFolder="/home/coding" accessType="SFTP" host="176.31.91.245" port="22" sshConfigId="0a2b7ea2-edcf-403e-b075-bfa8d979b195" sshConfig="root@176.31.91.245:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
