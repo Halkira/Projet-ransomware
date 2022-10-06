@@ -1,3 +1,0 @@
-C:/Users/Legro/CLionProjects/Projet-ransomware/cmake-build-debug/CMakeFiles/Projet_ransomware.dir
-C:/Users/Legro/CLionProjects/Projet-ransomware/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/Legro/CLionProjects/Projet-ransomware/cmake-build-debug/CMakeFiles/rebuild_cache.dir

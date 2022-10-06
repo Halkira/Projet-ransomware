@@ -4,5 +4,6 @@ project(Projet_ransomware C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(Projet_ransomware
-        Developpement.c
-        Labo2.c)
+        Developpement.c)
+
+add_subdirectory(labo)
