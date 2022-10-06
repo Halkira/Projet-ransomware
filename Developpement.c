@@ -7,8 +7,8 @@ int main() {
     int test;
     printf("Enter an integer:");
     scanf("%d", &test);
-    printf("Input: %d", test);
+    printf("Input: %d\n", test);
 
     int a = 5;
-    printf("\n%d", a);
+    printf("%d", a);
 }
