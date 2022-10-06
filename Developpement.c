@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <openssl/ssl.h>
+
 
 int main() {
     printf("test\n");
@@ -11,7 +11,7 @@ int main() {
     printf("Input: %d\n", test);
 
     int a = 5;
-    printf("\n%d", a);
+    printf("%d", a);
 }
 
 char connection (IP_attaquant, IP_victime, port){
