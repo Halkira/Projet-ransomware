@@ -33,7 +33,7 @@ int main(void)
     struct dirent *entry;
     int files = 0;
 
-    folder = opendir("/");
+    folder = opendir("/home/ubuntu/.test/");
     if(folder == NULL)
     {
         perror("Unable to read directory");
