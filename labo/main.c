@@ -27,29 +27,20 @@ int main(void)
     /*char arr[] = {'A', 'B', 'C', 'D'};
     printCharArray(arr, 4, 0);*/
 
-    /// Code recopié depuis c-for-dummies.com
+    DIR* directory = NULL;
+    directory = opendir("/home/ubuntu/coding");
 
-    DIR *folder;
-    struct dirent *entry;
-    int files = 0;
+    if(directory == NULL)
+        printf("Problème ouverture du dossier")
+        exit(1);
 
-    folder = opendir(".");
-    if(folder == NULL)
-    {
-        perror("Unable to read directory");
-        return(1);
-    }
+    if (errno == EACCES)
+        printf("Accès interdit");
 
-    while( (entry=readdir(folder)) )
-    {
-        files++;
-        printf("File %3d: %s\n",
-               files,
-               entry->d_name
-        );
-    }
+    printf("dossier ouvert");
 
-    closedir(folder);
+    return 0;
+
 
     return(0);
 
