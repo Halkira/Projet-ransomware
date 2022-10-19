@@ -21,27 +21,30 @@ void printCharArray(char arr[], int size, unsigned int i)
 }
 */
 
+void list_dir(){
+    DIR* directory = NULL;
+    struct dirent* fichier = NULL;
+    directory = opendir("/home/ubuntu/coding");
+
+    if(directory == NULL) {
+        printf("Problème ouverture du dossier");
+        exit(1);
+    }
+
+    while((fichier = readdir(directory)) != NULL){
+        printf("fichier lu '%s'\n", fichier->d_name);
+    }
+
+    return 0;
+}
+
 
 int main(void)
 {
     /*char arr[] = {'A', 'B', 'C', 'D'};
     printCharArray(arr, 4, 0);*/
 
-    DIR* directory = NULL;
-    directory = opendir("/home/ubuntu/coding");
-
-    if(directory == NULL)
-        printf("Problème ouverture du dossier")
-        exit(1);
-
-    if (errno == EACCES)
-        printf("Accès interdit");
-
-    printf("dossier ouvert");
-
-
-    return 0;
-
+    list_dir();
 
     return(0);
 
