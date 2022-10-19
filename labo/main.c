@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <dirent.h>
+#include <string.h>
 
 /// \param arr Array of Char
 /// \param size Size of the array
@@ -21,18 +22,11 @@ void printCharArray(char arr[], int size, unsigned int i)
 }
 */
 
-int isDir(struct dirent* ent){
-    if ((strchr(ent->d_name, '.')) == NULL){
-        return 1;
-    } else {
-        return 0;
-    }
-}
 
-void list_dir(){
-    DIR* directory = NULL;
-    struct dirent* fichier = NULL;
-    directory = opendir("/home/ubuntu/coding");
+void list_dir(const char* path) {
+    DIR *directory = NULL;
+    struct dirent *entry = NULL;
+    directory = opendir(path);
 
     while((fichier = readdir(directory)) != NULL){
         if (isDir(directory) == 1){
@@ -43,7 +37,7 @@ void list_dir(){
         printf("fichier lu '%s'\n", fichier->d_name);
     }
 
-    return 0;
+    closedir(directory);
 }
 
 
@@ -52,7 +46,7 @@ int main(void)
     /*char arr[] = {'A', 'B', 'C', 'D'};
     printCharArray(arr, 4, 0);*/
 
-    list_dir();
+    list_dir("/home/ubuntu/coding");
 
     return(0);
 
