@@ -21,17 +21,25 @@ void printCharArray(char arr[], int size, unsigned int i)
 }
 */
 
+int isDir(struct dirent* ent){
+    if ((strchr(ent->d_name, '.')) == NULL){
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
 void list_dir(){
     DIR* directory = NULL;
     struct dirent* fichier = NULL;
     directory = opendir("/home/ubuntu/coding");
 
-    if(directory == NULL) {
-        printf("Problème ouverture du dossier");
-        exit(1);
-    }
-
     while((fichier = readdir(directory)) != NULL){
+        if (isDir(directory) == 1){
+            printf("Fichier ");
+        } else if (isDir(directory) == 0){
+            printf("Dossier ");
+        }
         printf("fichier lu '%s'\n", fichier->d_name);
     }
 
@@ -47,7 +55,5 @@ int main(void)
     list_dir();
 
     return(0);
-
-
 
 }
