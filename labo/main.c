@@ -9,7 +9,6 @@ void list_dir(const char* path) {
     directory = opendir(path);
     printf("Reading files in: %s\n", path);
 
-    ///Check if there is an entry or not
     while ((entry = readdir(directory)) != NULL) {
 
         if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
@@ -20,7 +19,7 @@ void list_dir(const char* path) {
                 list_dir(buffer);
                 free(buffer);
             }
-        } else {
+        } else if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0){
             printf("%s/%s\n", path, entry->d_name);
         }
         free(list_dir);
