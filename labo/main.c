@@ -27,7 +27,6 @@ void list_dir(const char* path) {
             ///call the function for recursivity
             list_dir(path_file);
         }
-        printf("fichier lu '%s'\n", fichier->d_name);
     }
 
     closedir(directory);
