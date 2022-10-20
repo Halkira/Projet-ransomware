@@ -16,7 +16,7 @@ void list_dir(const char* path) {
         printf("%s/%s\n", path, entry->d_name);
 
         ///d_type is for checking if it's a dir or not (DT_DIR for dir)
-        ///strcomp is for comparing the string because when there is the file "." or ".." the recursivity doesn't work and make a loop
+        ///strcomp is for comparing the string because when there is the file "." or ".." the recursive doesn't work and make a loop
         if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
             ///we don't know the lenght of the path so we're setting that to 250
             char path_file[250] = {};
