@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <dirent.h>
 #include <string.h> ///library for string comparison and manipulation
+#include <stdlib.h>
 
 
-void list_dir(const char* path) {
+void list_dir(const char *path) {
     DIR *directory;
     struct dirent *entry;
     directory = opendir(path);
@@ -22,17 +23,21 @@ void list_dir(const char* path) {
         } else if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0){
             printf("%s/%s\n", path, entry->d_name);
         }
-        free(list_dir);
     }
 
     closedir(directory);
 }
 
+int main(int argc, char * argv[]) {
 
-int main(void)
-{
-    list_dir("/home/ubuntu/coding");
+    printf("%d arguments \n", argc-1);
 
-    return(0);
+    for(int i = 1; i<argc;i++){
+        printf("%s\n", argv[i]);
+        if (strlen(argv[i]) <= PATH_MAX){
+            list_dir(argv[i]);
+        }
+    }
+    return (0);
 
 }
