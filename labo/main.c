@@ -12,21 +12,22 @@ void list_dir(const char* path) {
     ///Check if there is an entry or not
     while ((entry = readdir(directory)) != NULL) {
 
-        ///entry is a struct so we can take the variable d_name with '->'
-        printf("%s/%s\n", path, entry->d_name);
-
         ///d_type is for checking if it's a dir or not (DT_DIR for dir)
         ///strcomp is for comparing the string because when there is the file "." or ".." the recursive doesn't work and make a loop
         if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+            unsigned short int lenght = (strlen(path)+1+strlen(entry->d_name)+1);
+            char *buffer = (char *)malloc(lenght * sizeof(char));
             ///we don't know the lenght of the path so we're setting that to 250
-            char path_file[250] = {};
             ///we concatenate the path to the path_files variable
-            strcat(path_file, path);
-            strcat(path_file, "/");
-            strcat(path_file, entry->d_name);
+            strcat(buffer, path);
+            strcat(buffer, "/");
+            strcat(buffer, entry->d_name);
             ///call the function for recursivity
-            list_dir(path_file);
+            list_dir(buffer);
+        } else {
+            printf("%s/%s\n", path, entry->d_name);
         }
+        free(list_dir);
     }
 
     closedir(directory);
