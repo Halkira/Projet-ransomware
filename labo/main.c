@@ -4,8 +4,8 @@
 
 
 void list_dir(const char* path) {
-    DIR *directory = NULL;
-    struct dirent *entry = NULL;
+    DIR *directory;
+    struct dirent *entry;
     directory = opendir(path);
     printf("Reading files in: %s\n", path);
 
@@ -36,9 +36,6 @@ void list_dir(const char* path) {
 
 int main(void)
 {
-    /*char arr[] = {'A', 'B', 'C', 'D'};
-    printCharArray(arr, 4, 0);*/
-
     list_dir("/home/ubuntu/coding");
 
     return(0);
