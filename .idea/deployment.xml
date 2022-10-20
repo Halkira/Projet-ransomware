@@ -2,11 +2,14 @@
 <project version="4">
   <component name="PublishConfigData" serverName="SRV KVM" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
-      <paths name="Remote Host (6823f259-8b24-48e9-a117-fd0186f17765)">
+      <paths name="Remote Host (0a3b88a5-acf4-47a6-8246-114a5feb1e49)">
         <serverdata>
           <mappings>
-            <mapping deploy="/tmp/tmp.Kh8AQe7pNC" local="$PROJECT_DIR$" />
+            <mapping deploy="/tmp/tmp.LOoB3iU0t1" local="$PROJECT_DIR$" />
           </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
+          </excludedPaths>
         </serverdata>
       </paths>
       <paths name="SRV KVM">

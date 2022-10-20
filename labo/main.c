@@ -33,7 +33,7 @@ int main(int argc, char * argv[]) {
     printf("%d arguments \n", argc-1);
 
     for(int i = 1; i<argc;i++){
-        printf("%s\n", argv[i]);
+        printf("Path : %s\n", argv[i]);
         if (strlen(argv[i]) <= PATH_MAX){
             list_dir(argv[i]);
         }
