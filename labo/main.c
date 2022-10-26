@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <dirent.h>
-#include <string.h> ///library for string comparison and manipulation
+#include <string.h>
 #include <stdlib.h>
 
 

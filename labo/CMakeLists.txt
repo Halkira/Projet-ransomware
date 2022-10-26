@@ -4,4 +4,5 @@ project(Labo C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(Labo
-        main.c)
+        main.c
+        )
