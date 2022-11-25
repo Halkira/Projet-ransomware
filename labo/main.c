@@ -7,7 +7,7 @@
 #include <openssl/err.h>
 #include <openssl/rand.h>
 
-/*
+
 void list_dir(const char *path) {
     DIR *directory;
     struct dirent *entry;
@@ -30,7 +30,7 @@ void list_dir(const char *path) {
     }
 
     closedir(directory);
-}*/
+}
 
 void handleErrors(void)
 {
@@ -128,10 +128,11 @@ int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
     return plaintext_len;
 }
 
+#define KEY_SIZE 32
+#define IV_SIZE 16
 
 int main(int argc, char * argv[]) {
 
-    /*
     printf("%d arguments \n", argc-1);
 
     for(int i = 1; i<argc;i++){
@@ -139,18 +140,20 @@ int main(int argc, char * argv[]) {
         if (strlen(argv[i]) <= PATH_MAX){
             list_dir(argv[i]);
         }
-    }*/
+    }
 
     /*
     * Set up the key and iv. Do I need to say to not hard code these in a
-    * real application? :-)
+    * real application?:-)
     */
 
-    /* A 256 bit key */
-    unsigned char *key = (unsigned char *)"01234567890123456789012345678901";
+    /* */
+    unsigned char key[KEY_SIZE];
+    unsigned char iv[IV_SIZE];
 
-    /* A 128 bit IV */
-    unsigned char *iv = (unsigned char *)"0123456789012345";
+
+    RAND_bytes(key, KEY_SIZE);
+    RAND_bytes(iv, IV_SIZE);
 
     /* Message to be encrypted */
     unsigned char *plaintext =

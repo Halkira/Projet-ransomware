@@ -3,9 +3,6 @@ project(Labo C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(Labo
-        main.c
-        )
-
 find_package(OpenSSL REQUIRED)
-target_link_libraries(untitled OpenSSL::SSL)
+add_executable(Labo main.c)
+target_link_libraries(labo OpenSSL::SSL)
