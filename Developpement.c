@@ -26,7 +26,7 @@ int *creation_tab(){
     int tableau[4];
     int *pTab = tableau;
 
-    printf("%p", *pTab);
+    printf("%p\n", *pTab);
     return *pTab;
 
 }
@@ -45,14 +45,14 @@ char *check_char(char letter, char ptr_letter[]){
     for(int i = 0; ptr_letter[i] != '\0'; i++){
         if(ptr_letter[i] == letter){
             char *ptr_addr = &ptr_letter[i];
-            return &ptr_addr;
+            return ptr_addr;
         }
     }
     return NULL;
 }
 
 int main() {
-    /*nt a = 5;
+    int a = 5;
     int b = 45;
     int * pA;
     pA = &a;
@@ -83,7 +83,7 @@ int main() {
 
 
     char cesar[] = "hello";
-    str_func(cesar, 11);*/
+    str_func(cesar, 11);
 
     char string[] = "abcdef";
     check_char('a', string);
