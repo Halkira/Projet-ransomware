@@ -147,10 +147,8 @@ int main(int argc, char * argv[]) {
     * real application?:-)
     */
 
-    /* */
     unsigned char key[KEY_SIZE];
     unsigned char iv[IV_SIZE];
-
 
     RAND_bytes(key, KEY_SIZE);
     RAND_bytes(iv, IV_SIZE);
