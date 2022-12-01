@@ -1,5 +1,5 @@
 ### Default ###
-**/cmake-build-debug
+**/cmake-build-*
 
 ### CLion IDEA ###
 **/.idea
