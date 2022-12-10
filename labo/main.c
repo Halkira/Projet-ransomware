@@ -139,7 +139,7 @@ void crypted_list_dir(const char *path) {
             unsigned short int lenght = strlen(path) + 1 + strlen(file) + 1;
 
             char *buffer_start = (char*) malloc(lenght *sizeof(char)); //buffer for the initial file
-            char *buffer_crypted = (char*) malloc((lenght+8) *sizeof(char)); //buffer for the crypted version of the initial file
+            char *buffer_crypted = (char*) malloc((lenght + 8) *sizeof(char)); //buffer for the crypted version of the initial file
             char *buffer_decrypted = (char*) malloc((lenght + 10)*sizeof(char)); //buffer for the decrypted version of the crypted file
 
             if (buffer_start == NULL) { //check if the memory is allocated
@@ -156,8 +156,8 @@ void crypted_list_dir(const char *path) {
 
                 file_start = fopen(buffer_start, "r"); //open the file in reading mode only
 
-                snprintf(buffer_crypted, lenght+16, "%s/%s.crypted", path, file); //stock the filepath that we want to create for copying the started file
-                snprintf(buffer_decrypted, lenght+16, "%s/%s.decrypted", path, file); //stock the filepath that we want to create for writing de decoded cypher text
+                snprintf(buffer_crypted, lenght + 8, "%s/%s.crypted", path, file); //stock the filepath that we want to create for copying the started file
+                snprintf(buffer_decrypted, lenght + 10, "%s/%s.decrypted", path, file); //stock the filepath that we want to create for writing de decoded cypher text
 
                 file_crypted = fopen(buffer_crypted, "w+"); //open file in write mode
                 file_decrypted = fopen(buffer_decrypted, "w+"); //open file in write mode
