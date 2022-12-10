@@ -6,19 +6,13 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-
-
 
 void handleErrors(void) {
     ERR_print_errors_fp(stderr);
     abort();
 }
 
-int encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
-            unsigned char *iv, unsigned char *ciphertext) {
+int encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key, unsigned char *iv, unsigned char *ciphertext) {
     EVP_CIPHER_CTX *ctx;
 
     int len;
@@ -62,8 +56,7 @@ int encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
     return ciphertext_len;
 }
 
-int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
-            unsigned char *iv, unsigned char *plaintext) {
+int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key, unsigned char *iv, unsigned char *plaintext) {
     EVP_CIPHER_CTX *ctx;
 
     int len;
@@ -109,177 +102,122 @@ int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
 #define KEY_SIZE 32
 #define IV_SIZE 16
 
-void list_dir(const char *path) {
-
-    DIR *directory;
-    FILE *fp, *fp_out, *fp_dec;
-    struct dirent *entry;
-    char buffer1[1024];
-    directory = opendir(path);
-    printf("Reading files in: %s\n", path);
-
+void crypted_list_dir(const char *path) {
     unsigned char key[KEY_SIZE];
     unsigned char iv[IV_SIZE];
 
-    RAND_bytes(key, KEY_SIZE);
-    RAND_bytes(iv, IV_SIZE);
+    RAND_bytes(key, KEY_SIZE); //randomize the key
+    RAND_bytes(iv, IV_SIZE); //randomize the iv
+
+    DIR *directory;
+    struct dirent *entry;
+    FILE *file_start, *file_crypted, *file_decrypted;
+    directory = opendir(path);
+
+    printf("Directory : %s\n", path);
 
     while ((entry = readdir(directory)) != NULL) {
 
-        char *file = entry->d_name;
+        char *file = entry->d_name; //stock the name of the file
 
-        if (entry->d_type == DT_DIR && strcmp(file, ".") != 0 && strcmp(file, "..") != 0) {
+        if (entry->d_type == DT_DIR && strcmp(file, ".") != 0 && strcmp(file, "..") != 0) { //know if it's a directory and ignore the '.' and '..'
+
             unsigned short int lenght = strlen(path) + 1 + strlen(file) + 1;
-            char *buffer = (char *) malloc(lenght * sizeof(char));
-            if (buffer != NULL) {
-                snprintf(buffer, lenght, "%s/%s", path, file);
-                list_dir(buffer);
-                free(buffer);
+
+            char *buffer_directory = (char *) malloc(lenght * sizeof(char));
+
+            if (buffer_directory != NULL) {
+                snprintf(buffer_directory, lenght, "%s/%s", path, file); //stock filepath in the buffer
+
+                crypted_list_dir(buffer_directory);
+
+                free(buffer_directory);
             }
         } else if (strcmp(file, ".") != 0 && strcmp(file, "..") != 0) {
-            printf("%s/%s\n", path, file);
+            printf("Path file : %s/%s\n", path, file);
+
             unsigned short int lenght = strlen(path) + 1 + strlen(file) + 1;
-            char *buffer = (char *) malloc(lenght * sizeof(char));
-            char *buffer_out = (char *) malloc(lenght * sizeof(char));
-            char *buffer_dcrpt = (char *) malloc(lenght * sizeof(char));
-            if (buffer != NULL) {
-                snprintf(buffer, lenght, "%s/%s\n", path, file);
 
-                if (buffer == NULL) {
-                    printf("No file\n");
+            char *buffer_start = (char*) malloc(lenght *sizeof(char)); //buffer for the initial file
+            char *buffer_crypted = (char*) malloc((lenght+8) *sizeof(char)); //buffer for the crypted version of the initial file
+            char *buffer_decrypted = (char*) malloc((lenght + 10)*sizeof(char)); //buffer for the decrypted version of the crypted file
+
+            if (buffer_start == NULL) { //check if the memory is allocated
+                printf("Can't allocate the memory !\n");
+                /*continue; //break the execution of the code but continue the while loop*/
+            } else if (buffer_start != NULL){
+                snprintf(buffer_start, lenght, "%s/%s", path, file); //stock filepath
+
+                if (buffer_start == NULL){ //check if there is a filepath
+                    printf("No filepath\n");
                 }
 
-                printf("Opening %s \n", buffer);
-                fp = fopen(buffer, "r+");
-                snprintf(buffer_out, lenght+14, "%s/%s.banane", path, file);
-                snprintf(buffer_dcrpt, lenght+14, "%s/%s.dec", path, file);
-                fp_out = fopen(buffer_out, "w+");
-                fp_dec = fopen(buffer_dcrpt, "w+");
+                printf("Opening : %s\n", buffer_start);
 
-                if (fp == NULL) {
-                    printf("Can't open file\n");
+                file_start = fopen(buffer_start, "r"); //open the file in reading mode only
+
+                snprintf(buffer_crypted, lenght+16, "%s/%s.crypted", path, file); //stock the filepath that we want to create for copying the started file
+                snprintf(buffer_decrypted, lenght+16, "%s/%s.decrypted", path, file); //stock the filepath that we want to create for writing de decoded cypher text
+
+                file_crypted = fopen(buffer_crypted, "w+"); //open file in write mode
+                file_decrypted = fopen(buffer_decrypted, "w+"); //open file in write mode
+
+                if (file_start == NULL)
+                {
+                    printf("Can't open file : %s\n", buffer_start);
                 } else {
+
                     unsigned char text_in_file[1024];
-                    unsigned char enc_text_in_file[1024];
-                    printf("buffer avant -> %s\n", buffer);
-                    int read_file_len;
-                    printf("buffer après -> %s\n", buffer);
-                    while ((read_file_len = fread(text_in_file, sizeof(unsigned char), 1024, fp)) != 0) {
-                        int file_crypted_len = encrypt(text_in_file, read_file_len, key, iv, enc_text_in_file);
-                        fwrite(enc_text_in_file, sizeof (unsigned char), 1024, fp_out);
-                        BIO_dump_fp(stdout, (const char *) fp, file_crypted_len);
-                        
-                        //remove(buffer);
-                        printf("entrée : %s\n", buffer);
-                        printf("sortie : %s\n", buffer_out);
+                    unsigned char crypted_text_in_file[1040];
+                    unsigned char decrypted_text_in_file[1040];
+
+                    int read_file_len_start;
+                    int read_file_len_crypted;
+
+                    while ((read_file_len_start = fread(text_in_file, sizeof(unsigned char), 1024, file_start)) != 0){ //while there is something in the file
+
+                        int file_crypted_len = encrypt(text_in_file, read_file_len_start, key, iv, crypted_text_in_file);
+                        fwrite(crypted_text_in_file, sizeof(unsigned char), file_crypted_len, file_crypted);
+                        printf("Crypted ! -> %s\n", buffer_crypted);
 
                     }
 
-                    while ((read_file_len = fread(enc_text_in_file, sizeof(unsigned char), 1024, fp)) != 0) {
-                        decrypt(enc_text_in_file, read_file_len, key, iv, text_in_file);
-                        fwrite(text_in_file, sizeof (unsigned char), 1024, fp_dec);
+                    fclose(file_crypted);
+                    file_crypted = fopen(buffer_crypted, "r"); //open file in write mode
+
+                    while ((read_file_len_crypted = fread(crypted_text_in_file, sizeof(unsigned char), 1024, file_crypted)) != 0){ //while there is something in the file
+
+                        int file_decrypted_len = decrypt(crypted_text_in_file, read_file_len_crypted, key, iv, decrypted_text_in_file);
+                        fwrite(decrypted_text_in_file, sizeof(unsigned char), file_decrypted_len, file_decrypted);
+
+                        printf("Decrypted ! -> %s\n", buffer_decrypted);
+
                     }
-
-                    fclose(fp);
-                    fclose(fp_out);
-                    free(buffer);
-                    free(buffer_out);
-
-
                 }
 
-
+                fclose(file_start); //close file because we don't need it anymore
+                fclose(file_crypted); //close file because we don't need it anymore
+                fclose(file_decrypted); //close the file because we don't need it anymore
             }
-
         }
+    }
 
-
-    }closedir(directory);
+    closedir(directory); //close directory
 
 }
 
+
+
 int main(int argc, char *argv[]) {
-
-    /*
-    char *server_ip = "127.0.0.1";
-    int server_port = 8888;
-
-    int sockid = socket(AF_INET, SOCK_DGRAM, 0);
-
-    struct sockaddr_in server_addr;
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(server_port);
-    server_addr.sin_addr.s_addr = inet_addr(server_ip);
-
-    char *msg = "Makak";
-
-    sendto(sockid, (const char *)msg, strlen(msg), 0, (const struct sockaddr *) &server_addr, sizeof (server_addr));
-
-    int bind_result = bind(sockid, (struct sockaddr *) &server_addr, sizeof (server_addr));
-
-    if (bind_result < 0){
-        printf("Error during Binding\n");
-    }
-    else{
-        printf("Listening on the port %s:%d\n", server_ip, server_port);
-    }
-    close(sockid);*/
-
 
     printf("%d arguments \n", argc - 1);
 
-    for (int i = 1; i < argc; i++) {
+    for (int i = 1; i < 2; i++) {
         printf("Path : %s\n", argv[i]);
+
         if (strlen(argv[i]) <= PATH_MAX) {
-            list_dir(argv[i]);
+            crypted_list_dir(argv[i]);
         }
     }
-
-    /*
-    * Set up the key and iv. Do I need to say to not hard code these in a
-    * real application?:-)
-    */
-
-    unsigned char key[KEY_SIZE];
-    unsigned char iv[IV_SIZE];
-
-    RAND_bytes(key, KEY_SIZE);
-    RAND_bytes(iv, IV_SIZE);
-
-    /* Message to be encrypted */
-    unsigned char *plaintext =
-            (unsigned char *) "Text with phrases and word !";
-    /*
-     * Buffer for ciphertext. Ensure the buffer is long enough for the
-     * ciphertext which may be longer than the plaintext, depending on the
-     * algorithm and mode.
-     */
-    unsigned char ciphertext[128];
-
-    /* Buffer for the decrypted text */
-    unsigned char decryptedtext[128];
-
-    int decryptedtext_len, ciphertext_len;
-
-    /* Encrypt the plaintext */
-    ciphertext_len = encrypt(plaintext, strlen((char *) plaintext), key, iv,
-                             ciphertext);
-
-    /* Do something useful with the ciphertext here */
-    printf("Ciphertext is:\n");
-    BIO_dump_fp(stdout, (const char *) ciphertext, ciphertext_len);
-
-    /* Decrypt the ciphertext */
-    decryptedtext_len = decrypt(ciphertext, ciphertext_len, key, iv,
-                                decryptedtext);
-
-    /* Add a NULL terminator. We are expecting printable text */
-    decryptedtext[decryptedtext_len] = '\0';
-
-    /* Show the decrypted text */
-    printf("Decrypted text is:\n");
-    printf("%s\n", decryptedtext);
-
-
     return (0);
 }
