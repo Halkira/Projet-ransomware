@@ -330,9 +330,9 @@ int main(int argc, char *argv[]) {
     printf("%d arguments \n", argc - 1);
 
     if (argc == 1){
-        printf("Manuel d'utilisation : \n"
-               "Pour chiffrer le répertoire : -crypt <PATH>\n"
-               "Pour déchiffrer le répertoire : -decrypt <PATH> <KEY> <IV>\n");
+        printf("----------------------- Manuel d'utilisation -----------------------\n"
+               "------------ Pour chiffrer le répertoire : -crypt <PATH> -----------\n"
+               "---- Pour déchiffrer le répertoire : -decrypt <PATH> <KEY> <IV> ----\n");
         exit(0);
     }
 
