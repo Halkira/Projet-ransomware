@@ -231,7 +231,6 @@ void crypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
 
                 fclose(file_start); //close file because we don't need it anymore
                 fclose(file_crypted); //close file because we don't need it anymore
-                fclose(file_decrypted); //close the file because we don't need it anymore
             }
         }
     }
