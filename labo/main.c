@@ -115,12 +115,14 @@ char *byteTOhex(const unsigned char *bytes, const unsigned short int size){
 }
 
 unsigned char *hexTObytes(const char *msg_hexa){
-    const char* hexstring = msg_hexa;
-    unsigned long int length = (strlen(msg_hexa) / 2);
-    unsigned char *msg_byte = (unsigned char *) malloc(length * sizeof(unsigned char ));
+    unsigned long int size = (strlen(msg_hexa) / 2);
+    unsigned char *msg_byte = (unsigned char *) malloc(size * sizeof(unsigned char ));
 
-    for (unsigned short int i = 0, j = 0; i < length; i++, j += 2)
-        msg_byte[i] = (hexstring[j] % 32 + 9) % 25 * 16 + (hexstring[j+1] % 32 + 9) % 25;
+    if (msg_byte == NULL)
+        return NULL;
+
+    for (unsigned short int i = 0, j = 0; i < size; i++, j += 2)
+        msg_byte[i] = (msg_hexa[j] % 32 + 9) % 25 * 16 + (msg_hexa[j+1] % 32 + 9) % 25;
 
     return msg_byte;
 }
@@ -339,16 +341,22 @@ int main(int argc, char *argv[]) {
 
         if (strlen(argv[2]) <= PATH_MAX != 0) {
             unsigned char *key_bytes, *iv_bytes;
+            char *key_hex, *iv_hex;
 
             key_bytes = hexTObytes(argv[3]);
             iv_bytes = hexTObytes(argv[4]);
 
-            printf("Key : %s\nIV : %s\n", byteTOhex(key_bytes, KEY_SIZE), byteTOhex(iv_bytes, IV_SIZE));
+            key_hex = byteTOhex(key_bytes, KEY_SIZE);
+            iv_hex = byteTOhex(iv_bytes, IV_SIZE);
+
+            printf("Key : %s\nIV : %s\n", key_hex, iv_hex);
 
             decrypted_list_dir(argv[2], key_bytes , iv_bytes);
 
             free(key_bytes);
             free(iv_bytes);
+            free(key_hex);
+            free(iv_hex);
             }
         } else if (strcmp(argv[1], "-crypt") == 0) {
         printf("Path : %s\n", argv[2]);
