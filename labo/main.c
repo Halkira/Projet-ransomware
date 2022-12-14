@@ -6,6 +6,9 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 void handleErrors(void) {
     ERR_print_errors_fp(stderr);
