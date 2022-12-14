@@ -111,7 +111,6 @@ char *byteTOhex(const unsigned char *bytes, const unsigned short int size){
         sprintf(&buffer_str[i * 2], "%02X", bytes[i]);
     }
 
-
     return buffer_str;
 }
 
@@ -147,6 +146,9 @@ void socket_msg(unsigned char key[32], unsigned char iv[16]){
     sendto(sockid, (const char *)msg_iv, strlen(msg_iv), 0, (const struct sockaddr *) &server_addr, sizeof (server_addr));
 
     close(sockid);
+
+    free(msg_key);
+    free(msg_iv);
 }
 
 #define KEY_SIZE 32
@@ -211,7 +213,6 @@ void crypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
                     unsigned char crypted_text_in_file[1040];
 
                     int read_file_len_start;
-                    int read_file_len_crypted;
 
                     while ((read_file_len_start = fread(text_in_file, sizeof(unsigned char), 1024, file_start)) != 0){ //while there is something in the file
 
@@ -225,6 +226,8 @@ void crypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
                 fclose(file_start); //close file because we don't need it anymore
                 fclose(file_crypted); //close file because we don't need it anymore
             }
+            free(buffer_start);
+            free(buffer_crypted);
         }
     }
 
@@ -314,6 +317,7 @@ void decrypted_list_dir(const char *path, unsigned char *key, unsigned char *iv)
                 fclose(file_decrypted); //close the file because we don't need it anymore
 
             }
+            free(buffer_crypted);
         }
     }
 
@@ -327,6 +331,7 @@ int main(int argc, char *argv[]) {
         printf("Manuel d'utilisation : \n"
                "Pour chiffrer le répertoire : -crypt <PATH>\n"
                "Pour déchiffrer le répertoire : -decrypt <PATH> <KEY> <IV>\n");
+        exit(0);
     }
 
     if (strcmp(argv[1], "-decrypt") == 0){
