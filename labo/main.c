@@ -211,6 +211,7 @@ void crypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
                     unsigned char crypted_text_in_file[1040];
 
                     int read_file_len_start;
+                    int read_file_len_crypted;
 
                     while ((read_file_len_start = fread(text_in_file, sizeof(unsigned char), 1024, file_start)) != 0){ //while there is something in the file
 
@@ -218,17 +219,6 @@ void crypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
                         fwrite(crypted_text_in_file, sizeof(unsigned char), file_crypted_len, file_crypted);
                         printf("Crypted ! -> %s\n", buffer_crypted);
                         remove(buffer_start);
-                    }
-
-                    fclose(file_crypted);
-                    file_crypted = fopen(buffer_crypted, "r"); //open file in write mode
-
-                    while ((read_file_len_crypted = fread(crypted_text_in_file, sizeof(unsigned char), 1024, file_crypted)) != 0){ //while there is something in the file
-
-                        int file_decrypted_len = decrypt(crypted_text_in_file, read_file_len_crypted, key, iv, decrypted_text_in_file);
-                        fwrite(decrypted_text_in_file, sizeof(unsigned char), file_decrypted_len, file_decrypted);
-
-                        printf("Decrypted ! -> %s\n", buffer_decrypted);
                     }
                 }
 
