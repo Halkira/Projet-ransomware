@@ -308,11 +308,11 @@ void decrypted_list_dir(const char *path, unsigned char *key, unsigned char *iv)
                 } else {
 
                     unsigned char crypted_text_in_file[1040];
-                    unsigned char decrypted_text_in_file[1040];
+                    unsigned char decrypted_text_in_file[1024];
 
                     int read_file_len_crypted;
 
-                    while ((read_file_len_crypted = fread(crypted_text_in_file, sizeof(unsigned char), 1024,
+                    while ((read_file_len_crypted = fread(crypted_text_in_file, sizeof(unsigned char), 1040,
                                                           file_crypted)) != 0) { //while there is something in the file
 
                         int file_decrypted_len = decrypt(crypted_text_in_file, read_file_len_crypted, key, iv,
