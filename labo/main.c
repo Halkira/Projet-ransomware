@@ -415,7 +415,6 @@ int main(int argc, char *argv[]) {
         key_hex = byteTOhex(key_bytes, KEY_SIZE);
         iv_hex = byteTOhex(iv_bytes, IV_SIZE);
 
-        printf("Key : %s \nIV : %s\n", key_hex, iv_hex);
         printf("------- Crypting ! -------\n");
 
         if (strlen(argv[2]) <= PATH_MAX != 0) {
@@ -423,12 +422,15 @@ int main(int argc, char *argv[]) {
         }
         memset(key_bytes, 0, KEY_SIZE);
         memset(iv_bytes, 0, IV_SIZE);
+
+        printf("------- Crypting done ! -------\n");
+
+        printf("Key : %s \nIV : %s\n", key_hex, iv_hex);
+
         free(key_bytes);
         free(iv_bytes);
         free(key_hex);
         free(iv_hex);
-
-        printf("------- Crypting done ! -------\n");
     }
 
     t = clock() - t;
