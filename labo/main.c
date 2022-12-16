@@ -222,7 +222,7 @@ void crypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
                     printf("No filepath\n");
                 }
 
-                //printf("Opening : %s\n", buffer_start); //print to see if the file is going to be open
+                //printf("Opening : %s\n", buffer_start); //uncomment to see if the file is going to be open
 
                 long int res = findSize(buffer_start);
 
@@ -425,6 +425,8 @@ int main(int argc, char *argv[]) {
         memset(iv_bytes, 0, IV_SIZE);
         free(key_bytes);
         free(iv_bytes);
+        free(key_hex);
+        free(iv_hex);
 
         printf("------- Crypting done ! -------\n");
     }
