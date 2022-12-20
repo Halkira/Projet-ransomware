@@ -145,18 +145,18 @@ void socket_msg(unsigned char key[32], unsigned char iv[16]) {
 
 long int findSize(char file_name[]){
 
-    FILE* fp = fopen(file_name, "r");
+    FILE* file_stream = fopen(file_name, "r");
 
-    if (fp == NULL) {
+    if (file_stream == NULL) {
         printf("File not found !\n");
         return -1;
     }
 
-    fseek(fp, 0L, SEEK_END);
+    fseek(file_stream, 0L, SEEK_END);
 
-    long int res = ftell(fp);
+    long int res = ftell(file_stream);
 
-    fclose(fp);
+    fclose(file_stream);
 
     return res;
 }
