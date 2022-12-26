@@ -345,6 +345,7 @@ void decrypted_list_dir(const char *path, unsigned char *key, unsigned char *iv)
 
     closedir(directory); //close directory
 
+    printf("--------------------------------------------------------\n");
     printf("Directory : %s......done!\n", path);
 }
 
